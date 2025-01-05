@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var moves: Int = 0
+    
     @State var carsDirection: [[Int]] = Array(repeating: Array(repeating: 0, count: 6), count: 6)
     @State var carsImages: [[Image]] = Array(repeating: Array(repeating: Image("car1"), count: 6), count: 6)
     
@@ -74,11 +76,12 @@ struct ContentView: View {
                             .aspectRatio(contentMode: .fit)
                             .onTapGesture {
                                 changeCarLocation(row: i, column: j)
+                                moves+=1
                             }
                     }
                 }
-                
             }
+            Text("Moves: \(moves)")
         }
         .padding()
         .onAppear() {
