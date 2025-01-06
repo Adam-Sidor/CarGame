@@ -85,7 +85,7 @@ struct ContentView: View {
             }
         }
         var howManyCars:Int=0
-        while howManyCars < 20 {
+        while howManyCars < 25 {
             print(howManyCars)
             let row = Int.random(in: 0..<6)
             let column = Int.random(in: 0..<6)
@@ -142,25 +142,31 @@ struct ContentView: View {
                     .font(.system(size: 50))
                     .foregroundColor(Color.white)
                     .fontWeight(.heavy)
-                ForEach(cars.indices, id: \.self) { i in
-                    HStack {
-                        ForEach(cars[i].indices, id: \.self) { j in
-                            cars[i][j].image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .onTapGesture {
-                                    if !isGameOver{
-                                        moves+=1
-                                        changeCarLocation(row: i, column: j)
-                                        isGameOver = isGameFinished()
-                                        if isGameOver{
-                                            showAlert=true
+                VStack{
+                    ForEach(cars.indices, id: \.self) { i in
+                        HStack {
+                            ForEach(cars[i].indices, id: \.self) { j in
+                                cars[i][j].image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .onTapGesture {
+                                        if !isGameOver{
+                                            moves+=1
+                                            changeCarLocation(row: i, column: j)
+                                            isGameOver = isGameFinished()
+                                            if isGameOver{
+                                                showAlert=true
+                                            }
                                         }
                                     }
-                                }
+                                
+                            }
                         }
                     }
                 }
+                .padding(8)
+                .background(Color.gray)
+                .cornerRadius(10)
                 HStack{
                     Spacer()
                     VStack{
