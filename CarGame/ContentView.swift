@@ -95,6 +95,10 @@ struct ContentView: View {
             Color.blue
                 .ignoresSafeArea()
             VStack {
+                Text("Car Game")
+                    .font(.system(size: 50))
+                    .foregroundColor(Color.white)
+                    .fontWeight(.heavy)
                 ForEach(cars.indices, id: \.self) { i in
                     HStack {
                         ForEach(cars[i].indices, id: \.self) { j in
@@ -127,6 +131,8 @@ struct ContentView: View {
                         }label: {
                             Text("Restart")
                                 .foregroundStyle(Color.white)
+                                .font(.system(size: 20))
+                                .fontWeight(.bold)
                         }
                         .padding()
                         .background(isGameOver ? Color.green : Color.red)
