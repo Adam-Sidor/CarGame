@@ -84,10 +84,53 @@ struct ContentView: View {
                 cars[i][j].refreshView()
             }
         }
-        let x:Int = Int.random(in: 0..<5)
-        let y:Int = Int.random(in: 0..<5)
-        cars[y][x].direction = 1
-        cars[y][x].refreshView()
+        var howManyCars:Int=0
+        while howManyCars < 20 {
+            print(howManyCars)
+            let row = Int.random(in: 0..<6)
+            let column = Int.random(in: 0..<6)
+            let direction = Int.random(in: 1...4)
+            var create:Bool = true
+            if cars[row][column].direction == 0 {
+                switch direction {
+                    case 1:
+                        for j in 0...row {
+                            if cars[j][column].direction == 3 {
+                                create = false
+                            }
+                        }
+                    case 2:
+                        for j in column...5 {
+                            if cars[row][j].direction == 4 {
+                                create = false
+                            }
+                        }
+                    case 3:
+                        for j in row...5 {
+                            if cars[j][column].direction == 1 {
+                                create = false
+                            }
+                        }
+                    case 4:
+                        for j in 0...column {
+                            if cars[row][j].direction == 2 {
+                                create = false
+                            }
+                        }
+                    default:
+                    create = false
+                }
+            }else{
+                create = false
+            }
+            if create {
+                cars[row][column].direction = direction
+                print("\(row), \(column), \(direction)")
+                print(separator: "\n")
+                cars[row][column].refreshView()
+                howManyCars += 1
+            }
+        }
     }
     
     var body: some View {
