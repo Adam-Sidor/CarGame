@@ -5,6 +5,10 @@ struct ContentView: View {
     @State var cars: [[Car]] = [[]]
     @State var showAlert:Bool = false
     @State var isGameOver:Bool = false
+    @State var isGameStarted:Bool = false
+    
+    @StateObject private var timerManager = TimerManager()
+    
     func changeCarLocation(row:Int,column:Int){
         if(cars[row][column].direction==1){
             if row>0{
@@ -125,8 +129,6 @@ struct ContentView: View {
             }
             if create {
                 cars[row][column].direction = direction
-                print("\(row), \(column), \(direction)")
-                print(separator: "\n")
                 cars[row][column].refreshView()
                 howManyCars += 1
             }
@@ -139,9 +141,13 @@ struct ContentView: View {
                 .ignoresSafeArea()
             VStack {
                 Text("Car Game")
-                    .font(.system(size: 50))
                     .foregroundColor(Color.white)
                     .fontWeight(.heavy)
+                    .font(.system(size: 50))
+                Text(timerManager.timeString)
+                    .foregroundStyle(Color.white)
+                    .fontWeight(.heavy)
+                    .font(.system(size: 20))
                 VStack{
                     ForEach(cars.indices, id: \.self) { i in
                         HStack {
@@ -151,12 +157,20 @@ struct ContentView: View {
                                     .aspectRatio(contentMode: .fit)
                                     .onTapGesture {
                                         if !isGameOver{
+                                            if !isGameStarted{
+                                                timerManager.startTimer()
+                                            }
+                                            isGameStarted=true
                                             moves+=1
                                             changeCarLocation(row: i, column: j)
                                             isGameOver = isGameFinished()
                                             if isGameOver{
+                                                timerManager.pauseTimer()
+                                                isGameStarted=false
                                                 showAlert=true
+                                                
                                             }
+                                            
                                         }
                                     }
                                 
@@ -177,6 +191,8 @@ struct ContentView: View {
                             createGrid()
                             moves=0
                             isGameOver=false
+                            timerManager.resetTimer()
+                            isGameStarted=false
                         }label: {
                             Text("Restart")
                                 .foregroundStyle(Color.white)
