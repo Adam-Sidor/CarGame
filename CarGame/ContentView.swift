@@ -8,10 +8,11 @@ struct ContentView: View {
     @State var isGameStarted:Bool = false
     @State var dificulty:Int = 0
     @StateObject private var timerManager = TimerManager()
-    
+    @State var isNewRecord:Bool = false
     @State var scoreboard: [[scoreboardItem]] = (FileManagerHelper.loadArray2D() ?? [[]])
     
     func updateScoreboard(){
+        isNewRecord=false
         if scoreboard.count<3{
             scoreboard.removeAll()
             print("Robie na nowo scoreboard")
@@ -21,10 +22,12 @@ struct ContentView: View {
         }
         if(scoreboard[dificulty].count<10){
             scoreboard[dificulty].append(scoreboardItem(moves: moves,time: timerManager.timeString))
+            isNewRecord=true
         }else{
             if scoreboard[dificulty][9].moves>moves{
                 scoreboard[dificulty].removeLast()
                 scoreboard[dificulty].append(scoreboardItem(moves: moves,time: timerManager.timeString))
+                isNewRecord=true
             }
         }
         scoreboard[dificulty].sort(by: { $0.moves < $1.moves })
@@ -196,10 +199,10 @@ struct ContentView: View {
                                                 changeCarLocation(row: i, column: j)
                                                 isGameOver = isGameFinished()
                                                 if isGameOver{
+                                                    updateScoreboard()
                                                     timerManager.pauseTimer()
                                                     isGameStarted=false
                                                     showAlert=true
-                                                    updateScoreboard()
                                                 }
                                                 
                                             }
@@ -264,7 +267,7 @@ struct ContentView: View {
                 .alert(isPresented: $showAlert) {
                     Alert(
                         title: Text("Gratulacje!"),
-                        message: Text("Wygrales"),
+                        message: isNewRecord ? Text("Wygrałeś! Wynik został zapisany w tablicy wyników.") : Text("Wygrałeś!"),
                         dismissButton: .default(Text("OK"))
                     )
                 }
