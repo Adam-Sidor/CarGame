@@ -47,6 +47,39 @@ class TimerManager: ObservableObject {
     }
 }
 
+struct scoreboardItem: Hashable,Encodable,Decodable{
+    var moves: Int
+    var time: String
+}
+
+struct FileManagerHelper {
+    static let fileName = "scoreboard.json"
+    
+    static var fileURL: URL {
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return documentsURL.appendingPathComponent(fileName)
+    }
+    
+    static func saveArray2D(_ array: [[scoreboardItem]]) {
+        do {
+            let data = try JSONEncoder().encode(array)
+            try data.write(to: fileURL)
+        } catch {
+            print(error)
+        }
+    }
+        static func loadArray2D() -> [[scoreboardItem]]? {
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let array = try JSONDecoder().decode([[scoreboardItem]].self, from: data)
+            return array
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+}
+
 @main
 struct CarGameApp: App {
     var body: some Scene {

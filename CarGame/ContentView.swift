@@ -6,8 +6,30 @@ struct ContentView: View {
     @State var showAlert:Bool = false
     @State var isGameOver:Bool = false
     @State var isGameStarted:Bool = false
-    @State var dificulty:Int = 1
+    @State var dificulty:Int = 0
     @StateObject private var timerManager = TimerManager()
+    
+    @State var scoreboard: [[scoreboardItem]] = (FileManagerHelper.loadArray2D() ?? [[]])
+    
+    func updateScoreboard(){
+        if scoreboard.count<3{
+            scoreboard.removeAll()
+            print("Robie na nowo scoreboard")
+            for _ in 0...2{
+                scoreboard.append([])
+            }
+        }
+        if(scoreboard[dificulty].count<10){
+            scoreboard[dificulty].append(scoreboardItem(moves: moves,time: timerManager.timeString))
+        }else{
+            if scoreboard[dificulty][9].moves>moves{
+                scoreboard[dificulty].removeLast()
+                scoreboard[dificulty].append(scoreboardItem(moves: moves,time: timerManager.timeString))
+            }
+        }
+        scoreboard[dificulty].sort(by: { $0.moves < $1.moves })
+        FileManagerHelper.saveArray2D(scoreboard)
+    }
     
     func changeCarLocation(row:Int,column:Int){
         if(cars[row][column].direction==1){
@@ -135,100 +157,117 @@ struct ContentView: View {
         }
     }
     
+    func resetGame(){
+        createGrid((1+dificulty)*10)
+        moves=0
+        isGameOver=false
+        timerManager.resetTimer()
+        isGameStarted=false
+    }
+    
     var body: some View {
-        ZStack{
-            Color.blue
-                .ignoresSafeArea()
-            VStack {
-                Text("Car Game")
-                    .foregroundColor(Color.white)
-                    .fontWeight(.heavy)
-                    .font(.system(size: 50))
-                Text(timerManager.timeString)
-                    .foregroundStyle(Color.white)
-                    .fontWeight(.heavy)
-                    .font(.system(size: 20))
-                VStack{
-                    ForEach(cars.indices, id: \.self) { i in
-                        HStack {
-                            ForEach(cars[i].indices, id: \.self) { j in
-                                cars[i][j].image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .onTapGesture {
-                                        if !isGameOver{
-                                            if !isGameStarted{
-                                                timerManager.startTimer()
-                                            }
-                                            isGameStarted=true
-                                            moves+=1
-                                            changeCarLocation(row: i, column: j)
-                                            isGameOver = isGameFinished()
-                                            if isGameOver{
-                                                timerManager.pauseTimer()
-                                                isGameStarted=false
-                                                showAlert=true
+        NavigationView {
+            ZStack{
+                Color.blue
+                    .ignoresSafeArea()
+                VStack {
+                    Text("Car Game")
+                        .foregroundColor(Color.white)
+                        .fontWeight(.heavy)
+                        .font(.system(size: 50))
+                    Text(timerManager.timeString)
+                        .foregroundStyle(Color.white)
+                        .fontWeight(.heavy)
+                        .font(.system(size: 20))
+                    VStack{
+                        ForEach(cars.indices, id: \.self) { i in
+                            HStack {
+                                ForEach(cars[i].indices, id: \.self) { j in
+                                    cars[i][j].image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .onTapGesture {
+                                            if !isGameOver{
+                                                if !isGameStarted{
+                                                    timerManager.startTimer()
+                                                }
+                                                isGameStarted=true
+                                                moves+=1
+                                                changeCarLocation(row: i, column: j)
+                                                isGameOver = isGameFinished()
+                                                if isGameOver{
+                                                    timerManager.pauseTimer()
+                                                    isGameStarted=false
+                                                    showAlert=true
+                                                    updateScoreboard()
+                                                }
                                                 
                                             }
-                                            
                                         }
-                                    }
-                                
+                                    
+                                }
                             }
                         }
                     }
-                }
-                .padding(8)
-                .background(Color.gray)
-                .cornerRadius(10)
-                HStack{
-                    Spacer()
-                    VStack{
-                        Text("Moves: \(moves)")
-                            .foregroundStyle(Color.white)
-                            .font(.system(size: 25))
-                        Button{
-                            createGrid(dificulty*10)
-                            moves=0
-                            isGameOver=false
-                            timerManager.resetTimer()
-                            isGameStarted=false
-                        }label: {
-                            Text("Restart")
+                    .padding(8)
+                    .background(Color.gray)
+                    .cornerRadius(10)
+                    HStack{
+                        Spacer()
+                        VStack{
+                            Text("Moves: \(moves)")
                                 .foregroundStyle(Color.white)
-                                .font(.system(size: 20))
-                                .fontWeight(.bold)
+                                .font(.system(size: 25))
+                            Button{
+                                resetGame()
+                            }label: {
+                                Text("Restart")
+                                    .foregroundStyle(Color.white)
+                                    .font(.system(size: 20))
+                                    .fontWeight(.bold)
+                            }
+                            .padding()
+                            .background(isGameOver ? Color.green : Color.red)
+                            .cornerRadius(10)
+                            .padding(.bottom)
+                            Picker(selection: $dificulty, label: Text("Poziom trudnosci")) {
+                                Text("Łatwy").tag(0)
+                                Text("Średni").tag(1)
+                                Text("Trudny").tag(2)
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .background(Color.blue.opacity(0.9))
+                            .cornerRadius(8)
+                            .onChange(of: dificulty) {_ in
+                                resetGame()
+                            }
                         }
-                        .padding()
-                        .background(isGameOver ? Color.green : Color.red)
-                        .cornerRadius(10)
-                        .padding(.bottom)
-                        Picker(selection: $dificulty, label: Text("Poziom trudnosci")) {
-                            Text("Łatwy").tag(1)
-                            Text("Średni").tag(2)
-                            Text("Trudny").tag(3)
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .background(Color.blue.opacity(0.9))
-                        .cornerRadius(8)
+                        Spacer()
                     }
-                    Spacer()
+                    .padding()
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(12)
+                    
+                }
+                .toolbar{
+                    ToolbarItem(placement: .navigationBarTrailing){
+                        NavigationLink(destination: ScoreBoardView()) {
+                            Image(systemName: "slider.horizontal.3")
+                        }
+                        .foregroundStyle(Color.white)
+                    }
                 }
                 .padding()
-                .background(Color.black.opacity(0.6))
-                .cornerRadius(12)
-                
-            }
-            .padding()
-            .onAppear() {
-                createGrid(dificulty * 10)
-            }
-            .alert(isPresented: $showAlert) { // Alert
-                Alert(
-                    title: Text("Gratulacje!"),
-                    message: Text("Wygrales"),
-                    dismissButton: .default(Text("OK"))
-                )
+                .onAppear() {
+                    createGrid((1+dificulty) * 10)
+                }
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Gratulacje!"),
+                        message: Text("Wygrales"),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
             }
         }
     }
