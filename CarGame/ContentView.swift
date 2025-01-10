@@ -6,7 +6,7 @@ struct ContentView: View {
     @State var showAlert:Bool = false
     @State var isGameOver:Bool = false
     @State var isGameStarted:Bool = false
-    
+    @State var dificulty:Int = 1
     @StateObject private var timerManager = TimerManager()
     
     func changeCarLocation(row:Int,column:Int){
@@ -77,7 +77,7 @@ struct ContentView: View {
         return finished
     }
     
-    func createGrid(){
+    func createGrid(_ carsCount:Int){
         if cars.count > 0 {
             cars.removeAll()
         }
@@ -89,7 +89,7 @@ struct ContentView: View {
             }
         }
         var howManyCars:Int=0
-        while howManyCars < 25 {
+        while howManyCars < carsCount {
             print(howManyCars)
             let row = Int.random(in: 0..<6)
             let column = Int.random(in: 0..<6)
@@ -188,7 +188,7 @@ struct ContentView: View {
                             .foregroundStyle(Color.white)
                             .font(.system(size: 25))
                         Button{
-                            createGrid()
+                            createGrid(dificulty*10)
                             moves=0
                             isGameOver=false
                             timerManager.resetTimer()
@@ -202,16 +202,26 @@ struct ContentView: View {
                         .padding()
                         .background(isGameOver ? Color.green : Color.red)
                         .cornerRadius(10)
+                        .padding(.bottom)
+                        Picker(selection: $dificulty, label: Text("Poziom trudnosci")) {
+                            Text("Łatwy").tag(1)
+                            Text("Średni").tag(2)
+                            Text("Trudny").tag(3)
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .background(Color.blue.opacity(0.9))
+                        .cornerRadius(8)
                     }
                     Spacer()
                 }
                 .padding()
                 .background(Color.black.opacity(0.6))
                 .cornerRadius(12)
+                
             }
             .padding()
             .onAppear() {
-                createGrid()
+                createGrid(dificulty * 10)
             }
             .alert(isPresented: $showAlert) { // Alert
                 Alert(
