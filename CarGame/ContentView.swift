@@ -252,7 +252,7 @@ struct ContentView: View {
                 .toolbar{
                     ToolbarItem(placement: .navigationBarTrailing){
                         NavigationLink(destination: ScoreBoardView()) {
-                            Image(systemName: "slider.horizontal.3")
+                            Image(systemName: "list.bullet.clipboard")
                         }
                         .foregroundStyle(Color.white)
                     }

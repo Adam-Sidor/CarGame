@@ -8,7 +8,7 @@ struct ScoreBoardView: View {
     var body: some View {
         NavigationView {
             ZStack{
-                Color.blue
+                LinearGradient(gradient: Gradient(colors: [Color.blue, Color.black.opacity(0.9)]), startPoint: .bottom, endPoint: .top)
                     .ignoresSafeArea()
                 VStack{
                     Text("Tablica wyników")
