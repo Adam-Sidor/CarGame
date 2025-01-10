@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ScoreBoardView: View {
-    @State var scoreboard: [[scoreboardItem]] = (FileManagerHelper.loadArray2D() ?? [[]])
+    @State var scoreboard: [[scoreboardItem]] = (FileManagerHelper.loadArray2D() ?? [[],[],[]])
     
     @State var selectedDificulty: Int = 0
     
